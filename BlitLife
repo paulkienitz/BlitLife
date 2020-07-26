@@ -1,0 +1,53 @@
+ 
+My best answer to the question: "How many blits does it take to grow a
+generation of 'Life' (the cellular automaton) with the blitter?" ::::
+ 
+The object is to take a 2D bitmap S and make from it a new bitmap D
+which is related to S as follows:  For each bit in S for which exactly
+three of the eight nearest neighboring bits are set, the corresponding
+bit in D is set; when exactly two neighbors are set the bit in D is
+the same as the bit in S; all other bits in D are cleared.
+ 
+Here's my best answer for how to do this with the blitter.  The
+notation S[y,x] means S accessed with an offset of y rows and a shift
+of x bits.  Operations are written as (destination bitmap) = (logical
+combination of source bitmaps).  B1, B2, B4, T, and TT are temporary
+intermediate bitmaps.  In real life I wouldn't waste that much memory;
+I'd operate on one row at a time.  That would make it a lot easier to
+dynamically resize the bitmap as the pattern in it grows and shrinks.
+Each row would be separately allocated.  In this algorithm S and D can
+be identical.
+    _________________________________________________________
+ 
+     /* first we handle neighbors 1, 2, and 3 */
+ B1 = S[-1,-1] xor S[-1,1] xor S[-1,0]
+ B2 = (S[-1,-1] and  S[-1,0]) or (S[-1,-1] and S[-1,1])
+                                or (S[-1,0] and S[-1,1])
+     /* that is, result set where at least two of the three
+        source bits are set -- minterm 0xE8  */
+ 
+     /* now neighbors 4 and 5 */
+ B4 = S[0,-1] and B2 and B1
+ B2 = (S[0,-1] and B1) xor B2
+ B1 = S[0,-1] xor S[0,1] xor B1
+ T = S[0,1] and B2 and not B1
+ B2 = (S[0,1] and not B1) xor B2
+ 
+     /* neighbors 6 and 7 */
+ TT = S[1,-1] and B1 and B2
+ B2 = (S[1,-1] and B1) xor B2
+ B4 = T or TT or B4
+ B1 = S[1,-1] xor S[1,0] xor B1
+ T = S[1,0] and B2 and not B1
+ B2 = (S[1,0] and not B1) xor B2
+ 
+     /* neighbor 8 */
+ TT = S[1,1] and B2 and B1
+ B2 = (S[1,1] and B1) xor B2
+ B4 = T or TT or B4
+ 
+     /* neighbors are almost counted; compute final result! */
+ T = (S[1,1] xor B1) or S[0,0]
+ D = T and B2 and not B4
+ 
+..............   eighteen blits.
