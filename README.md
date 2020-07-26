@@ -5,7 +5,7 @@ What we have here is an implementation of John Horton Conway's "Life" game,
 the famous cellular automaton, in which the growth algorithm is implemented on an Amiga
 using the "blitter", controlled by direct hardware pokes.
 
-At bottom, the blitter is does logical operations on large fields of bits,
+At bottom, the blitter does logical operations on large fields of bits,
 such as AND or XOR, barrel-shifting them as necessary to align with each other.
 By decomposing the numeric operations of the life algorithm (such as counting neighbors)
 into a basic logical form, the blitter can implement the Life growth algorithm as a series of steps,
